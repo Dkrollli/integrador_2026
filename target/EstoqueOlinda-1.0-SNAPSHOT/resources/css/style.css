@@ -1,0 +1,174 @@
+body{
+    margin:0;
+    font-family: Arial, sans-serif;
+    background:#ecf0f1;
+}
+/* ================= LOGIN ================= */
+.login-box{
+    width:320px;
+    margin:120px auto;
+    padding:30px;
+    background:white;
+    border-radius:10px;
+    box-shadow:0 5px 20px rgba(0,0,0,0.3);
+    text-align:center;
+}
+.login-box h2{
+    margin-bottom:20px;
+    color:#2c3e50;
+}
+.field{
+    margin-bottom:15px;
+}
+.ui-inputtext,
+.ui-password{
+    width:100%;
+}
+.btn-login{
+    width:100%;
+    background:#3498db !important;
+    border:none !important;
+}
+/* ================= HEADER ================= */
+.top-header{
+    background:#2c3e50;
+    color:white;
+    padding:20px 30px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    box-shadow:0 2px 6px rgba(0,0,0,0.2);
+}
+.titulo-sistema{
+    margin:0;
+}
+/* ================= MENU ================= */
+.menu-topo{
+    border:none !important;
+    border-radius:0 !important;
+    background:#34495e !important;
+}
+/* links menu principal */
+.menu-topo .ui-menuitem-link{
+    transition:0.3s;
+}
+/* ícones menu principal */
+.menu-topo .ui-menuitem-icon{
+    color:#3498db !important;
+}
+/* textos menu principal */
+.menu-topo .ui-menuitem-text{
+    color:white !important;
+}
+/* hover menu principal */
+.menu-topo .ui-menuitem-link:hover{
+    background:#2c3e50 !important;
+}
+/* hover texto principal */
+.menu-topo .ui-menuitem-link:hover .ui-menuitem-text{
+    color:#3498db !important;
+}
+/* hover ícones principal */
+.menu-topo .ui-menuitem-link:hover .ui-menuitem-icon{
+    color:white !important;
+}
+/* ================= SUBMENU CADASTROS ================= */
+/* caixa dropdown */
+.menu-topo .ui-menu-child{
+    background:#34495e !important;
+    border:none !important;
+    border-radius:0 0 6px 6px;
+    box-shadow:0 4px 10px rgba(0,0,0,0.2);
+    padding:5px 0;
+}
+/* itens dropdown */
+.menu-topo .ui-menu-child .ui-menuitem-link{
+    background:#34495e !important;
+    color:white !important;
+    transition:0.3s;
+}
+/* texto dropdown */
+.menu-topo .ui-menu-child .ui-menuitem-text{
+    color:white !important;
+}
+/* ícones dropdown */
+.menu-topo .ui-menu-child .ui-menuitem-icon{
+    color:#3498db !important;
+}
+/* hover dropdown */
+.menu-topo .ui-menu-child .ui-menuitem-link:hover{
+    background:#2c3e50 !important;
+}
+/* hover texto dropdown */
+.menu-topo .ui-menu-child .ui-menuitem-link:hover .ui-menuitem-text{
+    color:#3498db !important;
+}
+/* hover ícone dropdown */
+.menu-topo .ui-menu-child .ui-menuitem-link:hover .ui-menuitem-icon{
+    color:white !important;
+}
+/* ================= CONTEÚDO ================= */
+.conteudo{
+    padding:30px;
+}
+.titulo-pagina{
+    margin-bottom:25px;
+    color:#2c3e50;
+}
+/* ================= CARDS ================= */
+.painel-dashboard{
+    margin:10px;
+    border-radius:8px !important;
+    box-shadow:0 2px 8px rgba(0,0,0,0.1);
+}
+.numero-card{
+    text-align:center;
+    font-size:32px;
+    font-weight:bold;
+}
+.azul{
+    color:#2c3e50;
+}
+.laranja{
+    color:#e67e22;
+}
+.verde{
+    color:#27ae60;
+}
+/* ================= FOOTER ================= */
+.rodape{
+    margin-top:30px;
+    background:#2c3e50;
+    color:white;
+    text-align:center;
+    padding:15px;
+}
+/* submenu aberto */
+.menu-topo .ui-menuitem-active > .ui-menuitem-link{
+    background:#2c3e50 !important;
+}
+/* texto submenu aberto */
+.menu-topo .ui-menuitem-active > .ui-menuitem-link .ui-menuitem-text{
+    color:#3498db !important;
+}
+/* ícone submenu aberto */
+.menu-topo .ui-menuitem-active > .ui-menuitem-link .ui-menuitem-icon{
+    color:white !important;
+}
+/* ================= CLIENTES / FORMULÁRIOS ================= */
+/* linha de botões — substitui gap com margin */
+.botoes-form .ui-button{
+    margin-right:8px;
+}
+/* linha de busca */
+.barra-busca .ui-inputtext{
+    width:300px;
+    margin-right:8px;
+}
+.barra-busca .ui-button{
+    margin-right:8px;
+}
+/* espaço abaixo do formulário */
+.form-cliente-panel{
+    margin-bottom:1rem;
+}

@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+<h:head>
+    <title>Sistema de Estoque</title>
+
+    <h:outputStylesheet library="css" name="style.css"/>
+</h:head>
+
+<h:body>
+
+    <!-- Lê o parâmetro da URL e injeta no bean -->
+    <f:metadata>
+        <f:viewParam name="pagina" value="#{clienteBean.pagina}"/>
+    </f:metadata>
+
+    <!-- ================= HEADER ================= -->
+    <div class="top-header">
+
+        <h1 class="titulo-sistema">Tecnica Olinda</h1>
+
+        <h:form style="margin:0;">
+            <p:commandButton icon="pi pi-sign-out"
+                             action="login.xhtml?faces-redirect=true"
+                             styleClass="ui-button-danger ui-button-rounded ui-button-icon-only"/>
+        </h:form>
+
+    </div>
+
+    <!-- ================= MENU ================= -->
+    <h:form>
+
+        <p:menubar styleClass="menu-topo">
+
+            <p:menuitem value="Início"
+                        icon="pi pi-home"
+                        url="index.xhtml?pagina=inicio"/>
+
+            <p:submenu label="Cadastros" icon="pi pi-users">
+                <p:menuitem value="Clientes"
+                            icon="pi pi-user"
+                            url="index.xhtml?pagina=clientes"/>
+                <p:menuitem value="Funcionários"
+                            icon="pi pi-id-card"
+                            url="index.xhtml?pagina=funcionarios"/>
+            </p:submenu>
+
+            <p:menuitem value="Ordens"
+                        icon="pi pi-briefcase"
+                        url="index.xhtml?pagina=ordens"/>
+
+            <p:menuitem value="Vendas"
+                        icon="pi pi-shopping-cart"
+                        url="index.xhtml?pagina=vendas"/>
+
+            <p:menuitem value="Relatórios"
+                        icon="pi pi-chart-bar"
+                        url="index.xhtml?pagina=relatorios"/>
+
+        </p:menubar>
+
+    </h:form>
+
+    <!-- ================= CONTEÚDO ================= -->
+    <div class="conteudo">
+
+        <!-- ================= INÍCIO ================= -->
+        <p:outputPanel rendered="#{clienteBean.pagina eq 'inicio'}">
+
+            <h2 class="titulo-pagina">Início</h2>
+
+            <div class="ui-g">
+
+                <div class="ui-g-12 ui-md-4">
+                    <p:panel header="Total de Produtos" styleClass="painel-dashboard">
+                        <h2 class="numero-card azul">0</h2>
+                    </p:panel>
+                </div>
+
+                <div class="ui-g-12 ui-md-4">
+                    <p:panel header="Produtos em Falta" styleClass="painel-dashboard">
+                        <h2 class="numero-card laranja">0</h2>
+                    </p:panel>
+                </div>
+
+                <div class="ui-g-12 ui-md-4">
+                    <p:panel header="Movimentações Hoje" styleClass="painel-dashboard">
+                        <h2 class="numero-card verde">0</h2>
+                    </p:panel>
+                </div>
+
+            </div>
+
+        </p:outputPanel>
+
+        <!-- ================= CLIENTES ================= -->
+        <p:outputPanel rendered="#{clienteBean.pagina eq 'clientes'}">
+
+            <h2 class="titulo-pagina">Clientes</h2>
+
+            <!-- FORMULÁRIO — só aparece quando formularioVisivel = true -->
+            <h:form id="formCliente">
+
+                <p:outputPanel id="painelFormCliente"
+                               rendered="#{clienteBean.formularioVisivel}">
+
+                    <p:panel header="#{clienteBean.cliente.id == 0 ? 'Novo Cliente' : 'Editar Cliente'}"
+                             styleClass="painel-dashboard form-cliente-panel">
+
+                        <div class="ui-g ui-fluid">
+
+                            <!-- NOME -->
+                            <div class="ui-g-12 ui-md-6">
+                                <p:outputLabel for="nome" value="Nome *"/>
+                                <p:inputText id="nome"
+                                             value="#{clienteBean.cliente.nome}"
+                                             placeholder="Nome completo"
+                                             required="true"
+                                             requiredMessage="O nome é obrigatório"/>
+                            </div>
+
+                            <!-- CPF -->
+                            <div class="ui-g-12 ui-md-6">
+                                <p:outputLabel for="cpf" value="CPF *"/>
+                                <p:inputMask id="cpf"
+                                             value="#{clienteBean.cliente.cpf}"
+                                             mask="999.999.999-99"
+                                             placeholder="000.000.000-00"
+                                             required="true"
+                                             requiredMessage="O CPF é obrigatório"/>
+                            </div>
+
+                            <!-- TELEFONE -->
+                            <div class="ui-g-12 ui-md-6">
+                                <p:outputLabel for="telefone" value="Telefone *"/>
+                                <p:inputMask id="telefone"
+                                             value="#{clienteBean.cliente.telefone}"
+                                             mask="(99) 99999-9999"
+                                             placeholder="(00) 00000-0000"
+                                             required="true"
+                                             requiredMessage="O telefone é obrigatório"/>
+                            </div>
+
+                            <!-- ENDEREÇO -->
+                            <div class="ui-g-12 ui-md-6">
+                                <p:outputLabel for="endereco" value="Endereço *"/>
+                                <p:inputText id="endereco"
+                                             value="#{clienteBean.cliente.endereco}"
+                                             placeholder="Rua, número, bairro"
+                                             required="true"
+                                             requiredMessage="O endereço é obrigatório"/>
+                            </div>
+
+                        </div>
+
+                        <!-- MENSAGENS -->
+                        <p:messages showDetail="true" closable="true" style="margin-top:0.5rem;"/>
+
+                        <!-- BOTÕES DO FORMULÁRIO: Salvar + Cancelar -->
+                        <div class="botoes-form" style="margin-top:1rem;">
+
+                            <p:commandButton value="Salvar"
+                                             icon="pi pi-check"
+                                             action="#{clienteBean.salvar}"
+                                             update="formCliente tabelaClientesForm"
+                                             styleClass="ui-button-success"/>
+
+                            <p:commandButton value="Cancelar"
+                                             icon="pi pi-times"
+                                             action="#{clienteBean.cancelar}"
+                                             update="formCliente"
+                                             immediate="true"
+                                             styleClass="ui-button-secondary"/>
+
+                        </div>
+
+                    </p:panel>
+
+                </p:outputPanel>
+
+            </h:form>
+
+            <!-- TABELA DE CLIENTES -->
+            <h:form id="tabelaClientesForm">
+
+                <p:panel header="Clientes Cadastrados" styleClass="painel-dashboard">
+
+                    <!-- BARRA DE AÇÕES: Novo + Busca -->
+                    <div class="barra-acoes" style="margin-bottom:1rem;">
+
+                        <!-- Botão Novo Cliente — sempre visível aqui -->
+                        <p:commandButton value="Novo Cliente"
+                                         icon="pi pi-plus"
+                                         action="#{clienteBean.novo}"
+                                         update="formCliente tabelaClientesForm"
+                                         styleClass="ui-button-success"
+                                         style="margin-right:16px;"/>
+
+                        <p:inputText value="#{clienteBean.termoBusca}"
+                                     placeholder="Buscar por nome..."
+                                     style="width:250px; margin-right:8px;"/>
+
+                        <p:commandButton value="Buscar"
+                                         icon="pi pi-search"
+                                         action="#{clienteBean.buscar}"
+                                         update="tabelaClientesForm"
+                                         styleClass="ui-button-info"
+                                         style="margin-right:8px;"/>
+
+                        <p:commandButton value="Limpar"
+                                         icon="pi pi-times"
+                                         action="#{clienteBean.limparBusca}"
+                                         update="tabelaClientesForm"
+                                         immediate="true"
+                                         styleClass="ui-button-secondary"/>
+
+                    </div>
+
+                    <!-- TABELA -->
+                    <p:dataTable value="#{clienteBean.listaClientes}"
+                                 var="c"
+                                 emptyMessage="Nenhum cliente encontrado"
+                                 stripedRows="true"
+                                 paginator="true"
+                                 rows="10"
+                                 paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}"
+                                 style="width:100%;">
+
+                        <p:column headerText="Nome" sortBy="#{c.nome}">
+                            <h:outputText value="#{c.nome}"/>
+                        </p:column>
+
+                        <p:column headerText="CPF" style="width:140px;">
+                            <h:outputText value="#{c.cpf}"/>
+                        </p:column>
+
+                        <p:column headerText="Telefone" style="width:160px;">
+                            <h:outputText value="#{c.telefone}"/>
+                        </p:column>
+
+                        <p:column headerText="Endereço">
+                            <h:outputText value="#{c.endereco}"/>
+                        </p:column>
+
+                        <p:column headerText="Ações" style="width:100px; text-align:center;">
+
+                            <p:commandButton icon="pi pi-pencil"
+                                             title="Editar"
+                                             action="#{clienteBean.editar(c)}"
+                                             update="formCliente tabelaClientesForm"
+                                             styleClass="ui-button-warning ui-button-rounded ui-button-icon-only"
+                                             style="margin-right:4px;"/>
+
+                            <p:commandButton icon="pi pi-trash"
+                                             title="Excluir"
+                                             action="#{clienteBean.excluir(c)}"
+                                             update="tabelaClientesForm"
+                                             styleClass="ui-button-danger ui-button-rounded ui-button-icon-only"
+                                             onclick="return confirm('Confirma a exclusão do cliente?')"/>
+
+                        </p:column>
+
+                    </p:dataTable>
+
+                </p:panel>
+
+            </h:form>
+
+        </p:outputPanel>
+
+        <!-- ================= FUNCIONÁRIOS ================= -->
+        <p:outputPanel rendered="#{clienteBean.pagina eq 'funcionarios'}">
+            <h2 class="titulo-pagina">Funcionários</h2>
+            <p:panel header="Cadastro de Funcionários" styleClass="painel-dashboard">
+                Conteúdo de funcionários aqui.
+            </p:panel>
+        </p:outputPanel>
+
+        <!-- ================= ORDENS ================= -->
+        <p:outputPanel rendered="#{clienteBean.pagina eq 'ordens'}">
+            <h2 class="titulo-pagina">Ordens</h2>
+            <p:panel header="Ordens de Serviço" styleClass="painel-dashboard">
+                Conteúdo de ordens aqui.
+            </p:panel>
+        </p:outputPanel>
+
+        <!-- ================= VENDAS ================= -->
+        <p:outputPanel rendered="#{clienteBean.pagina eq 'vendas'}">
+            <h2 class="titulo-pagina">Vendas</h2>
+            <p:panel header="Controle de Vendas" styleClass="painel-dashboard">
+                Conteúdo de vendas aqui.
+            </p:panel>
+        </p:outputPanel>
+
+        <!-- ================= RELATÓRIOS ================= -->
+        <p:outputPanel rendered="#{clienteBean.pagina eq 'relatorios'}">
+            <h2 class="titulo-pagina">Relatórios</h2>
+            <p:panel header="Relatórios do Sistema" styleClass="painel-dashboard">
+                Conteúdo de relatórios aqui.
+            </p:panel>
+        </p:outputPanel>
+
+    </div>
+
+    <!-- ================= FOOTER ================= -->
+    <div class="rodape">
+        Sistema Tecnica Olinda © 2026
+    </div>
+
+</h:body>
+</html>

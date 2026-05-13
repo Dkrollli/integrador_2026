@@ -1,0 +1,8 @@
+controle\clienteBean.class
+facade\usuarioFacade.class
+facade\clienteFacade.class
+controle\loginBean.class
+entidade\usuario.class
+facade\AbstractFacade.class
+controle\usuarioBean.class
+entidade\cliente.class

@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:p="http://primefaces.org/ui">
+
+<h:head>
+    <title>Login - EstoqueOlinda</title>
+    <h:outputStylesheet library="css" name="style.css"/>
+</h:head>
+
+<h:body style="background:#2c3e50;">
+
+<!-- ================= LOGIN ================= -->
+<div class="login-box">
+
+    <h:form id="formLogin">
+
+        <h2>Tecnica Olinda</h2>
+
+        <!-- Popup de mensagens -->
+        <p:growl id="growlLogin" showDetail="true" life="3000" />
+
+        <div class="field">
+            <p:inputText id="usuario"
+                         placeholder="Usuário"
+                         value="#{loginBean.usuario}"
+                         required="true"
+                         requiredMessage="Informe o usuário"/>
+        </div>
+
+        <div class="field">
+            <p:password id="senha"
+                        placeholder="Senha"
+                        value="#{loginBean.senha}"
+                        required="true"
+                        requiredMessage="Informe a senha"/>
+        </div>
+
+        <p:commandButton value="Entrar"
+                         action="#{loginBean.login}"
+                         update="growlLogin"
+                         process="@form"
+                         styleClass="btn-login" />
+
+        <br/><br/>
+
+        <p:commandButton value="Criar conta"
+                         type="button"
+                         onclick="PF('dlgCadastro').show()" />
+
+    </h:form>
+
+</div>
+
+<!-- ================= MODAL CADASTRO ================= -->
+<p:dialog header="Criar Conta"
+          widgetVar="dlgCadastro"
+          modal="true"
+          closable="true"
+          width="350"
+          resizable="false">
+
+    <h:form id="formCadastro">
+
+        <!-- Popup de mensagens -->
+        <p:growl id="growlCadastro" showDetail="true" life="4000" />
+
+        <div class="field">
+            <p:inputText id="cadUsuario"
+                         placeholder="Usuário"
+                         value="#{usuarioBean.usuario.nome}"
+                         required="true"
+                         requiredMessage="Informe o usuário"/>
+        </div>
+
+        <div class="field">
+            <p:password id="cadSenha"
+                        placeholder="Senha"
+                        value="#{usuarioBean.usuario.senha}"
+                        required="true"
+                        requiredMessage="Informe a senha"/>
+        </div>
+
+        <div class="field">
+            <p:password id="cadConfirmar"
+                        placeholder="Confirmar Senha"
+                        value="#{usuarioBean.confirmarSenha}"
+                        required="true"
+                        requiredMessage="Confirme a senha"/>
+        </div>
+
+        <p:commandButton value="Cadastrar"
+                 action="#{usuarioBean.salvar}"
+                 process="@form"
+                 update="@form"
+                 styleClass="btn-login" />
+
+    </h:form>
+
+</p:dialog>
+
+</h:body>
+</html>
