@@ -2,73 +2,86 @@ package controle;
 
 import entidade.usuario;
 import facade.usuarioFacade;
-import java.util.List;
+import java.util.logging.Logger;
 import javax.ejb.EJB;
+import javax.enterprise.context.RequestScoped;
 import javax.faces.application.FacesMessage;
 import javax.faces.context.FacesContext;
+import javax.inject.Named;
+import javax.servlet.http.HttpSession;
 
-import javax.faces.bean.ManagedBean;
-import javax.faces.bean.RequestScoped;
-
-@ManagedBean(name = "loginBean")
+@Named("loginBean")
 @RequestScoped
 public class loginBean {
 
-    private String usuario;
+    private static final Logger LOG = Logger.getLogger(loginBean.class.getName());
+
+    // Credenciais do admin fixas — troque depois de subir o sistema
+    private static final String ADMIN_LOGIN = "admin";
+    private static final String ADMIN_SENHA = "admin123";
+
+    private String login;
     private String senha;
 
     @EJB
     private usuarioFacade facade;
 
-    public String login() {
+    public String entrar() {
 
-        if (usuario == null || usuario.isEmpty()
-                || senha == null || senha.isEmpty()) {
-
-            FacesContext.getCurrentInstance().addMessage(null,
-                    new FacesMessage(FacesMessage.SEVERITY_WARN,
-                            "Atenção", "Preencha usuário e senha"));
+        if (login == null || login.trim().isEmpty()
+                || senha == null || senha.trim().isEmpty()) {
+            addMessage(FacesMessage.SEVERITY_WARN, "Atenção", "Preencha o login e a senha");
             return null;
         }
 
-        List<usuario> lista = facade.findAll();
+        // ===== LOGIN DO ADMIN (hardcoded) =====
+        if (login.trim().equals(ADMIN_LOGIN) && senha.equals(ADMIN_SENHA)) {
+            LOG.info("Login admin realizado com sucesso");
+            HttpSession session = (HttpSession) FacesContext.getCurrentInstance()
+                    .getExternalContext().getSession(true);
+            session.setAttribute("perfil", "ADMIN");
+            session.setAttribute("nomeLogado", "Administrador");
+            return "index.xhtml?faces-redirect=true&pagina=inicio";
+        }
 
-        for (usuario u : lista) {
-            if (u.getNome().equals(usuario) && u.getSenha().equals(senha)) {
-                return "index.xhtml?faces-redirect=true";
+        // ===== LOGIN DE FUNCIONÁRIOS (banco) =====
+        usuario u = facade.findByLogin(login.trim());
+
+        if (u != null) {
+            // Funcionários cadastrados pelo admin usam senha em texto puro por enquanto
+            if (senha.equals(u.getSenha())) {
+                LOG.info("Login bem-sucedido: " + login + " | Perfil: " + u.getPerfil());
+                HttpSession session = (HttpSession) FacesContext.getCurrentInstance()
+                        .getExternalContext().getSession(true);
+                session.setAttribute("usuarioLogado", u);
+                session.setAttribute("perfil", u.getPerfil());
+                session.setAttribute("nomeLogado", u.getNome());
+                return "index.xhtml?faces-redirect=true&pagina=inicio";
             }
         }
 
-        FacesContext.getCurrentInstance().addMessage(null,
-                new FacesMessage(FacesMessage.SEVERITY_ERROR,
-                        "Erro", "Usuário ou senha inválidos"));
-
+        LOG.warning("Tentativa de login falhou para: " + login);
+        addMessage(FacesMessage.SEVERITY_ERROR, "Erro", "Login ou senha inválidos");
         return null;
     }
 
-    // getters e setters
-
-    public String getUsuario() {
-        return usuario;
+    public String logout() {
+        HttpSession session = (HttpSession) FacesContext.getCurrentInstance()
+                .getExternalContext().getSession(false);
+        if (session != null) {
+            session.invalidate();
+        }
+        return "login.xhtml?faces-redirect=true";
     }
 
-    public void setUsuario(String usuario) {
-        this.usuario = usuario;
+    private void addMessage(FacesMessage.Severity severity, String summary, String detail) {
+        FacesContext.getCurrentInstance().addMessage(null,
+                new FacesMessage(severity, summary, detail));
     }
 
-    public String getSenha() {
-        return senha;
-    }
+    public String getLogin() { return login; }
+    public void setLogin(String login) { this.login = login; }
 
-    public void setSenha(String senha) {
-        this.senha = senha;
-    }
-
-    public usuarioFacade getFacade() {
-        return facade;
-    }
-
-    public void setFacade(usuarioFacade facade) {
-        this.facade = facade;
-    }
+    public String getSenha() { return senha; }
+    public void setSenha(String senha) { this.senha = senha; }
 }

@@ -2,78 +2,178 @@ package controle;
 
 import entidade.usuario;
 import facade.usuarioFacade;
+import java.io.Serializable;
+import java.util.List;
+import java.util.logging.Logger;
+import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
 import javax.faces.application.FacesMessage;
 import javax.faces.context.FacesContext;
+import javax.faces.view.ViewScoped;
+import javax.inject.Named;
 
-import javax.faces.bean.ManagedBean;
-import javax.faces.bean.RequestScoped;
+@Named("usuarioBean")
+@ViewScoped
+public class usuarioBean implements Serializable {
 
-@ManagedBean(name = "usuarioBean")
-@RequestScoped
-public class usuarioBean {
+    private static final Logger LOG = Logger.getLogger(usuarioBean.class.getName());
 
     private usuario usuario = new usuario();
-    private String confirmarSenha;
+    private List<usuario> listaUsuarios;
+    private String senhaTexto = "";
+    private String confirmarSenha = "";
+    private String termoBusca = "";
+    private boolean formularioVisivel = false;
 
     @EJB
     private usuarioFacade facade;
 
-    public String salvar() {
+    @PostConstruct
+    public void init() {
+        carregarLista();
+    }
 
-        if (usuario.getNome() == null || usuario.getNome().isEmpty() ||
-            usuario.getSenha() == null || usuario.getSenha().isEmpty() ||
-            confirmarSenha == null || confirmarSenha.isEmpty()) {
+    // ===================== CARREGAR LISTA =====================
 
-            FacesContext.getCurrentInstance().addMessage(null,
-                new FacesMessage(FacesMessage.SEVERITY_WARN,
-                "Atenção", "Preencha todos os campos!"));
-            return null;
-        }
+    public void carregarLista() {
+        listaUsuarios = facade.findAll();
+    }
 
-        if (!usuario.getSenha().equals(confirmarSenha)) {
+    // ===================== NOVO =====================
 
-            FacesContext.getCurrentInstance().addMessage(null,
-                new FacesMessage(FacesMessage.SEVERITY_ERROR,
-                "Erro", "As senhas não conferem!"));
-            return null;
-        }
-
-        facade.create(usuario);
-
-        FacesContext.getCurrentInstance().addMessage(null,
-            new FacesMessage(FacesMessage.SEVERITY_INFO,
-            "Sucesso", "Usuário cadastrado com sucesso!"));
-
+    public void novo() {
         usuario = new usuario();
-        confirmarSenha = null;
-
-        return null;
+        senhaTexto = "";
+        confirmarSenha = "";
+        formularioVisivel = true;
     }
 
-    // getters e setters
+    // ===================== EDITAR =====================
 
-    public usuario getUsuario() {
-        return usuario;
+    public void editar(usuario u) {
+        this.usuario = new usuario();
+        this.usuario.setId(u.getId());
+        this.usuario.setNome(u.getNome());
+        this.usuario.setLogin(u.getLogin());
+        this.usuario.setSenha(u.getSenha());
+        this.usuario.setPerfil(u.getPerfil());
+        senhaTexto = "";
+        confirmarSenha = "";
+        formularioVisivel = true;
     }
 
-    public void setUsuario(usuario usuario) {
-        this.usuario = usuario;
+    // ===================== CANCELAR =====================
+
+    public void cancelar() {
+        usuario = new usuario();
+        senhaTexto = "";
+        confirmarSenha = "";
+        formularioVisivel = false;
     }
 
-    public String getConfirmarSenha() {
-        return confirmarSenha;
+    // ===================== SALVAR =====================
+
+    public void salvar() {
+
+        // Validação de login duplicado
+        if (facade.loginJaCadastrado(usuario.getLogin(), usuario.getId())) {
+            addMessage(FacesMessage.SEVERITY_ERROR, "Erro", "Este login já está em uso!");
+            return;
+        }
+
+        // Novo usuário: senha obrigatória
+        if (usuario.getId() == 0 && (senhaTexto == null || senhaTexto.trim().isEmpty())) {
+            addMessage(FacesMessage.SEVERITY_ERROR, "Erro", "Informe uma senha!");
+            return;
+        }
+
+        // Se digitou senha, valida e salva em texto puro
+        if (senhaTexto != null && !senhaTexto.trim().isEmpty()) {
+
+            if (senhaTexto.length() < 6) {
+                addMessage(FacesMessage.SEVERITY_ERROR, "Erro", "A senha deve ter pelo menos 6 caracteres!");
+                return;
+            }
+
+            if (!senhaTexto.equals(confirmarSenha)) {
+                addMessage(FacesMessage.SEVERITY_ERROR, "Erro", "As senhas não conferem!");
+                return;
+            }
+
+            // Salva direto sem hash por enquanto
+            usuario.setSenha(senhaTexto);
+        }
+
+        try {
+            if (usuario.getId() == 0) {
+                facade.create(usuario);
+                addMessage(FacesMessage.SEVERITY_INFO, "Sucesso", "Funcionário cadastrado com sucesso!");
+            } else {
+                facade.edit(usuario);
+                addMessage(FacesMessage.SEVERITY_INFO, "Sucesso", "Funcionário atualizado com sucesso!");
+            }
+            cancelar();
+            carregarLista();
+
+        } catch (Exception e) {
+            LOG.severe("Erro ao salvar usuário: " + e.getMessage());
+            addMessage(FacesMessage.SEVERITY_ERROR, "Erro", "Falha ao salvar. Tente novamente.");
+        }
     }
 
-    public void setConfirmarSenha(String confirmarSenha) {
-        this.confirmarSenha = confirmarSenha;
+    // ===================== EXCLUIR =====================
+
+    public void excluir(usuario u) {
+        try {
+            facade.remove(u);
+            addMessage(FacesMessage.SEVERITY_INFO, "Sucesso", "Usuário removido com sucesso!");
+            carregarLista();
+        } catch (Exception e) {
+            LOG.severe("Erro ao excluir usuário: " + e.getMessage());
+            addMessage(FacesMessage.SEVERITY_ERROR, "Erro", "Não foi possível remover o usuário.");
+        }
     }
 
-    public usuarioFacade getFacade() {
-        return facade;
+    // ===================== BUSCAR =====================
+
+    public void buscar() {
+        if (termoBusca == null || termoBusca.trim().isEmpty()) {
+            carregarLista();
+        } else {
+            listaUsuarios = facade.findByNome(termoBusca.trim());
+        }
     }
 
-    public void setFacade(usuarioFacade facade) {
-        this.facade = facade;
+    // ===================== LIMPAR BUSCA =====================
+
+    public void limparBusca() {
+        termoBusca = "";
+        carregarLista();
     }
+
+    // ===================== UTILITÁRIO =====================
+
+    private void addMessage(FacesMessage.Severity severity, String summary, String detail) {
+        FacesContext.getCurrentInstance().addMessage(null,
+                new FacesMessage(severity, summary, detail));
+    }
+
+    // ===================== GETTERS E SETTERS =====================
+
+    public usuario getUsuario() { return usuario; }
+    public void setUsuario(usuario usuario) { this.usuario = usuario; }
+
+    public List<usuario> getListaUsuarios() { return listaUsuarios; }
+
+    public String getSenhaTexto() { return senhaTexto; }
+    public void setSenhaTexto(String senhaTexto) { this.senhaTexto = senhaTexto; }
+                                                                            
+    public String getConfirmarSenha() { return confirmarSenha; }
+    public void setConfirmarSenha(String confirmarSenha) { this.confirmarSenha = confirmarSenha; }
+
+    public String getTermoBusca() { return termoBusca; }
+    public void setTermoBusca(String termoBusca) { this.termoBusca = termoBusca; }
+
+    public boolean isFormularioVisivel() { return formularioVisivel; }
+    public void setFormularioVisivel(boolean formularioVisivel) { this.formularioVisivel = formularioVisivel; }
 }

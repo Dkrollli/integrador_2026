@@ -4,311 +4,657 @@
       xmlns:p="http://primefaces.org/ui"
       xmlns:f="http://xmlns.jcp.org/jsf/core">
 
-<h:head>
-    <title>Sistema de Estoque</title>
+    <h:head>
+        <title>Sistema de Estoque</title>
+        <h:outputStylesheet library="css" name="style.css"/>
+    </h:head>
 
-    <h:outputStylesheet library="css" name="style.css"/>
-</h:head>
+    <h:body>
 
-<h:body>
+        <f:metadata>
+            <f:viewParam name="pagina" value="#{clienteBean.pagina}"/>
+        </f:metadata>
 
-    <!-- Lê o parâmetro da URL e injeta no bean -->
-    <f:metadata>
-        <f:viewParam name="pagina" value="#{clienteBean.pagina}"/>
-    </f:metadata>
+        <!-- ================= HEADER ================= -->
+        <div class="top-header">
 
-    <!-- ================= HEADER ================= -->
-    <div class="top-header">
+            <h1 class="titulo-sistema">Tecnica Olinda</h1>
 
-        <h1 class="titulo-sistema">Tecnica Olinda</h1>
+            <div class="header-direita">
 
-        <h:form style="margin:0;">
-            <p:commandButton icon="pi pi-sign-out"
-                             action="login.xhtml?faces-redirect=true"
-                             styleClass="ui-button-danger ui-button-rounded ui-button-icon-only"/>
-        </h:form>
+                <span class="usuario-logado">
+                    #{sessionScope.nomeLogado}
+                    <span class="badge-perfil #{sessionScope.perfil eq 'ADMIN' ? 'badge-admin' : 'badge-func'}">
+                        #{sessionScope.perfil eq 'ADMIN' ? 'Admin' : 'Funcionário'}
+                    </span>
+                </span>
 
-    </div>
-
-    <!-- ================= MENU ================= -->
-    <h:form>
-
-        <p:menubar styleClass="menu-topo">
-
-            <p:menuitem value="Início"
-                        icon="pi pi-home"
-                        url="index.xhtml?pagina=inicio"/>
-
-            <p:submenu label="Cadastros" icon="pi pi-users">
-                <p:menuitem value="Clientes"
-                            icon="pi pi-user"
-                            url="index.xhtml?pagina=clientes"/>
-                <p:menuitem value="Funcionários"
-                            icon="pi pi-id-card"
-                            url="index.xhtml?pagina=funcionarios"/>
-            </p:submenu>
-
-            <p:menuitem value="Ordens"
-                        icon="pi pi-briefcase"
-                        url="index.xhtml?pagina=ordens"/>
-
-            <p:menuitem value="Vendas"
-                        icon="pi pi-shopping-cart"
-                        url="index.xhtml?pagina=vendas"/>
-
-            <p:menuitem value="Relatórios"
-                        icon="pi pi-chart-bar"
-                        url="index.xhtml?pagina=relatorios"/>
-
-        </p:menubar>
-
-    </h:form>
-
-    <!-- ================= CONTEÚDO ================= -->
-    <div class="conteudo">
-
-        <!-- ================= INÍCIO ================= -->
-        <p:outputPanel rendered="#{clienteBean.pagina eq 'inicio'}">
-
-            <h2 class="titulo-pagina">Início</h2>
-
-            <div class="ui-g">
-
-                <div class="ui-g-12 ui-md-4">
-                    <p:panel header="Total de Produtos" styleClass="painel-dashboard">
-                        <h2 class="numero-card azul">0</h2>
-                    </p:panel>
-                </div>
-
-                <div class="ui-g-12 ui-md-4">
-                    <p:panel header="Produtos em Falta" styleClass="painel-dashboard">
-                        <h2 class="numero-card laranja">0</h2>
-                    </p:panel>
-                </div>
-
-                <div class="ui-g-12 ui-md-4">
-                    <p:panel header="Movimentações Hoje" styleClass="painel-dashboard">
-                        <h2 class="numero-card verde">0</h2>
-                    </p:panel>
-                </div>
+                <h:form style="margin:0;">
+                    <p:commandButton icon="pi pi-sign-out"
+                                     action="#{loginBean.logout}"
+                                     styleClass="ui-button-danger ui-button-rounded ui-button-icon-only"
+                                     title="Sair"/>
+                </h:form>
 
             </div>
 
-        </p:outputPanel>
+        </div>
 
-        <!-- ================= CLIENTES ================= -->
-        <p:outputPanel rendered="#{clienteBean.pagina eq 'clientes'}">
+        <!-- ================= MENU ================= -->
+        <h:form>
 
-            <h2 class="titulo-pagina">Clientes</h2>
+            <p:menubar styleClass="menu-topo">
 
-            <!-- FORMULÁRIO — só aparece quando formularioVisivel = true -->
-            <h:form id="formCliente">
+                <p:menuitem value="Início"
+                            icon="pi pi-home"
+                            url="index.xhtml?pagina=inicio"/>
 
-                <p:outputPanel id="painelFormCliente"
-                               rendered="#{clienteBean.formularioVisivel}">
+                <p:submenu label="Cadastros" icon="pi pi-users">
 
-                    <p:panel header="#{clienteBean.cliente.id == 0 ? 'Novo Cliente' : 'Editar Cliente'}"
-                             styleClass="painel-dashboard form-cliente-panel">
+                    <p:menuitem value="Clientes"
+                                icon="pi pi-user"
+                                url="index.xhtml?pagina=clientes"/>
 
-                        <div class="ui-g ui-fluid">
+                    <!-- Funcionários: apenas ADMIN -->
+                    <p:menuitem value="Funcionários"
+                                icon="pi pi-id-card"
+                                url="index.xhtml?pagina=funcionarios"
+                                rendered="#{sessionScope.perfil eq 'ADMIN'}"/>
 
-                            <!-- NOME -->
-                            <div class="ui-g-12 ui-md-6">
-                                <p:outputLabel for="nome" value="Nome *"/>
-                                <p:inputText id="nome"
-                                             value="#{clienteBean.cliente.nome}"
-                                             placeholder="Nome completo"
-                                             required="true"
-                                             requiredMessage="O nome é obrigatório"/>
+                </p:submenu>
+
+                <p:menuitem value="Ordens"
+                            icon="pi pi-briefcase"
+                            url="index.xhtml?pagina=ordens"/>
+
+                <p:menuitem value="Vendas"
+                            icon="pi pi-shopping-cart"
+                            url="index.xhtml?pagina=vendas"/>
+
+                <!-- Relatórios: apenas ADMIN -->
+                <p:menuitem value="Relatórios"
+                            icon="pi pi-chart-bar"
+                            url="index.xhtml?pagina=relatorios"
+                            rendered="#{sessionScope.perfil eq 'ADMIN'}"/>
+
+            </p:menubar>
+
+        </h:form>
+
+        <!-- ================= CONTEÚDO ================= -->
+        <div class="conteudo">
+
+            <!-- ================= INÍCIO ================= -->
+            <p:outputPanel rendered="#{clienteBean.pagina eq 'inicio'}">
+
+                <h2 class="titulo-pagina">Início</h2>
+
+                <div class="ui-g">
+                    <div class="ui-g-12 ui-md-4">
+                        <p:panel header="Total de Produtos" styleClass="painel-dashboard">
+                            <h2 class="numero-card azul">0</h2>
+                        </p:panel>
+                    </div>
+                    <div class="ui-g-12 ui-md-4">
+                        <p:panel header="Produtos em Falta" styleClass="painel-dashboard">
+                            <h2 class="numero-card laranja">0</h2>
+                        </p:panel>
+                    </div>
+                    <div class="ui-g-12 ui-md-4">
+                        <p:panel header="Movimentações Hoje" styleClass="painel-dashboard">
+                            <h2 class="numero-card verde">0</h2>
+                        </p:panel>
+                    </div>
+                </div>
+
+            </p:outputPanel>
+
+            <!-- ================= CLIENTES ================= -->
+            <p:outputPanel rendered="#{clienteBean.pagina eq 'clientes'}">
+
+                <h2 class="titulo-pagina">Clientes</h2>
+
+                <h:form id="formCliente">
+                    <p:outputPanel id="painelFormCliente" rendered="#{clienteBean.formularioVisivel}">
+
+                        <p:panel header="#{clienteBean.cliente.id == 0 ? 'Novo Cliente' : 'Editar Cliente'}"
+                                 styleClass="painel-dashboard form-cliente-panel">
+
+                            <div class="ui-g ui-fluid">
+
+                                <div class="ui-g-12 ui-md-6">
+                                    <p:outputLabel for="nomeCliente" value="Nome *"/>
+                                    <p:inputText id="nomeCliente"
+                                                 value="#{clienteBean.cliente.nome}"
+                                                 placeholder="Nome completo"
+                                                 required="true"
+                                                 requiredMessage="O nome é obrigatório"/>
+                                </div>
+
+                                <div class="ui-g-12 ui-md-6">
+                                    <p:outputLabel for="cpfCliente" value="CPF *"/>
+                                    <p:inputMask id="cpfCliente"
+                                                 value="#{clienteBean.cliente.cpf}"
+                                                 mask="999.999.999-99"
+                                                 placeholder="000.000.000-00"
+                                                 required="true"
+                                                 requiredMessage="O CPF é obrigatório"/>
+                                </div>
+
+                                <div class="ui-g-12 ui-md-6">
+                                    <p:outputLabel for="telefoneCliente" value="Telefone *"/>
+                                    <p:inputMask id="telefoneCliente"
+                                                 value="#{clienteBean.cliente.telefone}"
+                                                 mask="(99) 99999-9999"
+                                                 placeholder="(00) 00000-0000"
+                                                 required="true"
+                                                 requiredMessage="O telefone é obrigatório"/>
+                                </div>
+
+                                <div class="ui-g-12 ui-md-6">
+                                    <p:outputLabel for="enderecoCliente" value="Endereço *"/>
+                                    <p:inputText id="enderecoCliente"
+                                                 value="#{clienteBean.cliente.endereco}"
+                                                 placeholder="Rua, número, bairro"
+                                                 required="true"
+                                                 requiredMessage="O endereço é obrigatório"/>
+                                </div>
+
                             </div>
 
-                            <!-- CPF -->
-                            <div class="ui-g-12 ui-md-6">
-                                <p:outputLabel for="cpf" value="CPF *"/>
-                                <p:inputMask id="cpf"
-                                             value="#{clienteBean.cliente.cpf}"
-                                             mask="999.999.999-99"
-                                             placeholder="000.000.000-00"
-                                             required="true"
-                                             requiredMessage="O CPF é obrigatório"/>
+                            <p:messages showDetail="true" closable="true" style="margin-top:0.5rem;"/>
+
+                            <div class="botoes-form" style="margin-top:1rem;">
+                                <p:commandButton value="Salvar"
+                                                 icon="pi pi-check"
+                                                 action="#{clienteBean.salvar}"
+                                                 update="formCliente tabelaClientesForm"
+                                                 styleClass="ui-button-success"/>
+                                <p:commandButton value="Cancelar"
+                                                 icon="pi pi-times"
+                                                 action="#{clienteBean.cancelar}"
+                                                 update="formCliente"
+                                                 immediate="true"
+                                                 styleClass="ui-button-secondary"/>
                             </div>
 
-                            <!-- TELEFONE -->
-                            <div class="ui-g-12 ui-md-6">
-                                <p:outputLabel for="telefone" value="Telefone *"/>
-                                <p:inputMask id="telefone"
-                                             value="#{clienteBean.cliente.telefone}"
-                                             mask="(99) 99999-9999"
-                                             placeholder="(00) 00000-0000"
-                                             required="true"
-                                             requiredMessage="O telefone é obrigatório"/>
-                            </div>
+                        </p:panel>
 
-                            <!-- ENDEREÇO -->
-                            <div class="ui-g-12 ui-md-6">
-                                <p:outputLabel for="endereco" value="Endereço *"/>
-                                <p:inputText id="endereco"
-                                             value="#{clienteBean.cliente.endereco}"
-                                             placeholder="Rua, número, bairro"
-                                             required="true"
-                                             requiredMessage="O endereço é obrigatório"/>
-                            </div>
+                    </p:outputPanel>
+                </h:form>
 
+                <h:form id="tabelaClientesForm">
+                    <p:panel header="Clientes Cadastrados" styleClass="painel-dashboard">
+
+                        <div class="barra-acoes" style="margin-bottom:1rem;">
+                            <p:commandButton value="Novo Cliente"
+                                             icon="pi pi-plus"
+                                             action="#{clienteBean.novo}"
+                                             update="formCliente tabelaClientesForm"
+                                             styleClass="ui-button-success"
+                                             style="margin-right:16px;"/>
+                            <p:inputText value="#{clienteBean.termoBusca}"
+                                         placeholder="Buscar por nome..."
+                                         style="width:250px; margin-right:8px;"/>
+                            <p:commandButton value="Buscar"
+                                             icon="pi pi-search"
+                                             action="#{clienteBean.buscar}"
+                                             update="tabelaClientesForm"
+                                             styleClass="ui-button-info"
+                                             style="margin-right:8px;"/>
+                            <p:commandButton value="Limpar"
+                                             icon="pi pi-times"
+                                             action="#{clienteBean.limparBusca}"
+                                             update="tabelaClientesForm"
+                                             immediate="true"
+                                             styleClass="ui-button-secondary"/>
                         </div>
 
-                        <!-- MENSAGENS -->
-                        <p:messages showDetail="true" closable="true" style="margin-top:0.5rem;"/>
+                        <p:dataTable value="#{clienteBean.listaClientes}"
+                                     var="c"
+                                     emptyMessage="Nenhum cliente encontrado"
+                                     stripedRows="true"
+                                     paginator="true"
+                                     rows="10"
+                                     paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}"
+                                     style="width:100%;">
 
-                        <!-- BOTÕES DO FORMULÁRIO: Salvar + Cancelar -->
-                        <div class="botoes-form" style="margin-top:1rem;">
+                            <p:column headerText="Nome" sortBy="#{c.nome}">
+                                <h:outputText value="#{c.nome}"/>
+                            </p:column>
+                            <p:column headerText="CPF" style="width:140px;">
+                                <h:outputText value="#{c.cpf}"/>
+                            </p:column>
+                            <p:column headerText="Telefone" style="width:160px;">
+                                <h:outputText value="#{c.telefone}"/>
+                            </p:column>
+                            <p:column headerText="Endereço">
+                                <h:outputText value="#{c.endereco}"/>
+                            </p:column>
+                            <p:column headerText="Ações" style="width:100px; text-align:center;">
+                                <p:commandButton icon="pi pi-pencil"
+                                                 title="Editar"
+                                                 action="#{clienteBean.editar(c)}"
+                                                 update="formCliente tabelaClientesForm"
+                                                 styleClass="ui-button-warning ui-button-rounded ui-button-icon-only"
+                                                 style="margin-right:4px;"/>
+                                <p:commandButton icon="pi pi-trash"
+                                                 title="Excluir"
+                                                 action="#{clienteBean.excluir(c)}"
+                                                 update="tabelaClientesForm"
+                                                 styleClass="ui-button-danger ui-button-rounded ui-button-icon-only"
+                                                 onclick="return confirm('Confirma a exclusão do cliente?')"/>
+                            </p:column>
 
-                            <p:commandButton value="Salvar"
-                                             icon="pi pi-check"
-                                             action="#{clienteBean.salvar}"
-                                             update="formCliente tabelaClientesForm"
-                                             styleClass="ui-button-success"/>
+                        </p:dataTable>
 
-                            <p:commandButton value="Cancelar"
+                    </p:panel>
+                </h:form>
+
+            </p:outputPanel>
+
+            <!-- ================= FUNCIONÁRIOS (apenas ADMIN) ================= -->
+            <p:outputPanel rendered="#{clienteBean.pagina eq 'funcionarios' and sessionScope.perfil eq 'ADMIN'}">
+
+                <h2 class="titulo-pagina">Funcionários</h2>
+
+                <h:form id="formFuncionario">
+                    <p:outputPanel id="painelFormFuncionario" rendered="#{usuarioBean.formularioVisivel}">
+
+                        <p:panel header="#{usuarioBean.usuario.id == 0 ? 'Novo Funcionário' : 'Editar Funcionário'}"
+                                 styleClass="painel-dashboard form-cliente-panel">
+
+                            <div class="ui-g ui-fluid">
+
+                                <div class="ui-g-12 ui-md-6">
+                                    <p:outputLabel for="nomeFuncionario" value="Nome *"/>
+                                    <p:inputText id="nomeFuncionario"
+                                                 value="#{usuarioBean.usuario.nome}"
+                                                 placeholder="Nome completo"
+                                                 required="true"
+                                                 requiredMessage="O nome é obrigatório"/>
+                                </div>
+
+                                <div class="ui-g-12 ui-md-6">
+                                    <p:outputLabel for="loginFuncionario" value="Login *"/>
+                                    <p:inputText id="loginFuncionario"
+                                                 value="#{usuarioBean.usuario.login}"
+                                                 placeholder="Login de acesso"
+                                                 required="true"
+                                                 requiredMessage="O login é obrigatório"/>
+                                </div>
+
+                                <div class="ui-g-12 ui-md-6">
+                                    <p:outputLabel for="senhaFuncionario"
+                                                   value="#{usuarioBean.usuario.id == 0 ? 'Senha *' : 'Nova Senha (deixe em branco para não alterar)'}"/>
+                                    <p:password id="senhaFuncionario"
+                                                value="#{usuarioBean.senhaTexto}"
+                                                placeholder="Mínimo 6 caracteres"
+                                                feedback="false"/>
+                                </div>
+
+                                <div class="ui-g-12 ui-md-6">
+                                    <p:outputLabel for="confirmarSenhaFuncionario" value="Confirmar Senha"/>
+                                    <p:password id="confirmarSenhaFuncionario"
+                                                value="#{usuarioBean.confirmarSenha}"
+                                                placeholder="Repita a senha"
+                                                feedback="false"/>
+                                </div>
+
+                                <div class="ui-g-12 ui-md-6">
+                                    <p:outputLabel for="perfilFuncionario" value="Perfil *"/>
+                                    <p:selectOneMenu id="perfilFuncionario"
+                                                     value="#{usuarioBean.usuario.perfil}"
+                                                     required="true"
+                                                     requiredMessage="Selecione o perfil">
+                                        <f:selectItem itemValue="FUNCIONARIO" itemLabel="Funcionário"/>
+                                        <f:selectItem itemValue="ADMIN"       itemLabel="Administrador"/>
+                                    </p:selectOneMenu>
+                                </div>
+
+                            </div>
+
+                            <p:messages showDetail="true" closable="true" style="margin-top:0.5rem;"/>
+
+                            <div class="botoes-form" style="margin-top:1rem;">
+                                <p:commandButton value="Salvar"
+                                                 icon="pi pi-check"
+                                                 action="#{usuarioBean.salvar}"
+                                                 update="formFuncionario tabelaFuncionariosForm"
+                                                 styleClass="ui-button-success"/>
+                                <p:commandButton value="Cancelar"
+                                                 icon="pi pi-times"
+                                                 action="#{usuarioBean.cancelar}"
+                                                 update="formFuncionario"
+                                                 immediate="true"
+                                                 styleClass="ui-button-secondary"/>
+                            </div>
+
+                        </p:panel>
+
+                    </p:outputPanel>
+                </h:form>
+
+                <h:form id="tabelaFuncionariosForm">
+                    <p:panel header="Funcionários Cadastrados" styleClass="painel-dashboard">
+
+                        <div class="barra-acoes" style="margin-bottom:1rem;">
+                            <p:commandButton value="Novo Funcionário"
+                                             icon="pi pi-plus"
+                                             action="#{usuarioBean.novo}"
+                                             update="formFuncionario tabelaFuncionariosForm"
+                                             styleClass="ui-button-success"
+                                             style="margin-right:16px;"/>
+                            <p:inputText value="#{usuarioBean.termoBusca}"
+                                         placeholder="Buscar por nome..."
+                                         style="width:250px; margin-right:8px;"/>
+                            <p:commandButton value="Buscar"
+                                             icon="pi pi-search"
+                                             action="#{usuarioBean.buscar}"
+                                             update="tabelaFuncionariosForm"
+                                             styleClass="ui-button-info"
+                                             style="margin-right:8px;"/>
+                            <p:commandButton value="Limpar"
                                              icon="pi pi-times"
-                                             action="#{clienteBean.cancelar}"
-                                             update="formCliente"
+                                             action="#{usuarioBean.limparBusca}"
+                                             update="tabelaFuncionariosForm"
+                                             immediate="true"
+                                             styleClass="ui-button-secondary"/>
+                        </div>
+
+                        <p:dataTable value="#{usuarioBean.listaUsuarios}"
+                                     var="u"
+                                     emptyMessage="Nenhum funcionário cadastrado"
+                                     stripedRows="true"
+                                     paginator="true"
+                                     rows="10"
+                                     paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}"
+                                     style="width:100%;">
+
+                            <p:column headerText="Nome" sortBy="#{u.nome}">
+                                <h:outputText value="#{u.nome}"/>
+                            </p:column>
+                            <p:column headerText="Login" style="width:150px;">
+                                <h:outputText value="#{u.login}"/>
+                            </p:column>
+                            <p:column headerText="Perfil" style="width:140px;">
+                                <span class="badge-perfil #{u.perfil eq 'ADMIN' ? 'badge-admin' : 'badge-func'}">
+                                    #{u.perfil eq 'ADMIN' ? 'Administrador' : 'Funcionário'}
+                                </span>
+                            </p:column>
+                            <p:column headerText="Ações" style="width:100px; text-align:center;">
+                                <p:commandButton icon="pi pi-pencil"
+                                                 title="Editar"
+                                                 action="#{usuarioBean.editar(u)}"
+                                                 update="formFuncionario tabelaFuncionariosForm"
+                                                 styleClass="ui-button-warning ui-button-rounded ui-button-icon-only"
+                                                 style="margin-right:4px;"/>
+                                <p:commandButton icon="pi pi-trash"
+                                                 title="Excluir"
+                                                 action="#{usuarioBean.excluir(u)}"
+                                                 update="tabelaFuncionariosForm"
+                                                 styleClass="ui-button-danger ui-button-rounded ui-button-icon-only"
+                                                 onclick="return confirm('Confirma a exclusão do funcionário?')"/>
+                            </p:column>
+
+                        </p:dataTable>
+
+                    </p:panel>
+                </h:form>
+
+            </p:outputPanel>
+
+            <!-- ================= ORDENS ================= -->
+            <p:outputPanel rendered="#{clienteBean.pagina eq 'ordens'}">
+
+                <h2 class="titulo-pagina">Ordens de Serviço</h2>
+
+                <!-- FORMULÁRIO -->
+                <h:form id="formOrdem">
+                    <p:outputPanel id="painelFormOrdem" rendered="#{ordemBean.formularioVisivel}">
+
+                        <p:panel header="#{ordemBean.ordem.id == 0 ? 'Nova Ordem de Serviço' : ordemBean.ordem.numeroOrdem}"
+                                 styleClass="painel-dashboard form-cliente-panel">
+
+                            <div class="ui-g ui-fluid">
+
+                                <!-- CLIENTE -->
+                                <div class="ui-g-12 ui-md-6">
+                                    <p:outputLabel for="clienteOrdem" value="Cliente *"/>
+                                    <p:selectOneMenu id="clienteOrdem"
+                                                     value="#{ordemBean.ordem.cliente}"
+                                                     converter="#{clienteConverter}"
+                                                     required="true"
+                                                     requiredMessage="Selecione um cliente">
+                                        <f:selectItem itemValue="#{null}" itemLabel="-- Selecione --" noSelectionOption="true"/>
+                                        <f:selectItems value="#{ordemBean.listaClientes}"
+                                                       var="c"
+                                                       itemValue="#{c}"
+                                                       itemLabel="#{c.nome}"/>
+                                    </p:selectOneMenu>
+                                </div>
+
+                                <!-- STATUS -->
+                                <div class="ui-g-12 ui-md-6">
+                                    <p:outputLabel for="statusOrdem" value="Status *"/>
+                                    <p:selectOneMenu id="statusOrdem"
+                                                     value="#{ordemBean.ordem.status}"
+                                                     required="true">
+                                        <f:selectItem itemValue="AGUARDANDO_ANALISE" itemLabel="Aguardando Análise"/>
+                                        <f:selectItem itemValue="AGUARDANDO_PECA"    itemLabel="Aguardando Peça"/>
+                                        <f:selectItem itemValue="PRE_PRONTO"         itemLabel="Pré-Pronto"/>
+                                        <f:selectItem itemValue="CONCLUIDA"          itemLabel="Concluída"/>
+                                        <f:selectItem itemValue="CANCELADA"          itemLabel="Cancelada"/>
+                                    </p:selectOneMenu>
+                                </div>
+
+                                <!-- EQUIPAMENTO -->
+                                <div class="ui-g-12 ui-md-6">
+                                    <p:outputLabel for="equipamento" value="Equipamento *"/>
+                                    <p:inputText id="equipamento"
+                                                 value="#{ordemBean.ordem.equipamento}"
+                                                 placeholder="Ex: Notebook, Celular, Impressora..."
+                                                 required="true"
+                                                 requiredMessage="O equipamento é obrigatório"/>
+                                </div>
+
+                                <!-- MARCA -->
+                                <div class="ui-g-12 ui-md-6">
+                                    <p:outputLabel for="marca" value="Marca"/>
+                                    <p:inputText id="marca"
+                                                 value="#{ordemBean.ordem.marca}"
+                                                 placeholder="Ex: Dell, Samsung, HP..."/>
+                                </div>
+
+                                <!-- MODELO -->
+                                <div class="ui-g-12 ui-md-6">
+                                    <p:outputLabel for="modelo" value="Modelo"/>
+                                    <p:inputText id="modelo"
+                                                 value="#{ordemBean.ordem.modelo}"
+                                                 placeholder="Ex: Inspiron 15, Galaxy S21..."/>
+                                </div>
+
+                                <!-- NÚMERO DE SÉRIE -->
+                                <div class="ui-g-12 ui-md-6">
+                                    <p:outputLabel for="numeroSerie" value="Número de Série"/>
+                                    <p:inputText id="numeroSerie"
+                                                 value="#{ordemBean.ordem.numeroSerie}"
+                                                 placeholder="Número de série do equipamento"/>
+                                </div>
+
+                                <!-- DEFEITO -->
+                                <div class="ui-g-12">
+                                    <p:outputLabel for="defeito" value="Defeito Relatado *"/>
+                                    <p:inputTextarea id="defeito"
+                                                     value="#{ordemBean.ordem.defeito}"
+                                                     placeholder="Descreva o defeito relatado pelo cliente..."
+                                                     rows="3"
+                                                     autoResize="false"
+                                                     required="true"
+                                                     requiredMessage="O defeito é obrigatório"
+                                                     style="width:100%;"/>
+                                </div>
+
+                                <!-- OBSERVAÇÕES -->
+                                <div class="ui-g-12">
+                                    <p:outputLabel for="observacoes" value="Observações Internas"/>
+                                    <p:inputTextarea id="observacoes"
+                                                     value="#{ordemBean.ordem.observacoes}"
+                                                     placeholder="Observações internas, diagnóstico, etc..."
+                                                     rows="3"
+                                                     autoResize="false"
+                                                     style="width:100%;"/>
+                                </div>
+
+                            </div>
+
+                            <p:messages showDetail="true" closable="true" style="margin-top:0.5rem;"/>
+
+                            <div class="botoes-form" style="margin-top:1rem;">
+                                <p:commandButton value="Salvar"
+                                                 icon="pi pi-check"
+                                                 action="#{ordemBean.salvar}"
+                                                 update="formOrdem tabelaOrdensForm"
+                                                 styleClass="ui-button-success"/>
+                                <p:commandButton value="Cancelar"
+                                                 icon="pi pi-times"
+                                                 action="#{ordemBean.cancelar}"
+                                                 update="formOrdem"
+                                                 immediate="true"
+                                                 styleClass="ui-button-secondary"/>
+                            </div>
+
+                        </p:panel>
+
+                    </p:outputPanel>
+                </h:form>
+
+                <!-- TABELA -->
+                <h:form id="tabelaOrdensForm">
+                    <p:panel header="Ordens de Serviço" styleClass="painel-dashboard">
+
+                        <!-- BARRA DE AÇÕES -->
+                        <div class="barra-acoes" style="margin-bottom:1rem;">
+
+                            <p:commandButton value="Nova Ordem"
+                                             icon="pi pi-plus"
+                                             action="#{ordemBean.novo}"
+                                             update="formOrdem tabelaOrdensForm"
+                                             styleClass="ui-button-success"
+                                             style="margin-right:16px;"/>
+
+                            <p:selectOneMenu value="#{ordemBean.filtroBusca}"
+                                             style="width:160px; margin-right:8px;">
+                                <f:selectItem itemValue="numero"  itemLabel="Nº da Ordem"/>
+                                <f:selectItem itemValue="cliente" itemLabel="Cliente"/>
+                            </p:selectOneMenu>
+
+                            <p:inputText value="#{ordemBean.termoBusca}"
+                                         placeholder="Buscar..."
+                                         style="width:200px; margin-right:8px;"/>
+
+                            <p:commandButton value="Buscar"
+                                             icon="pi pi-search"
+                                             action="#{ordemBean.buscar}"
+                                             update="tabelaOrdensForm"
+                                             styleClass="ui-button-info"
+                                             style="margin-right:8px;"/>
+
+                            <p:commandButton value="Limpar"
+                                             icon="pi pi-times"
+                                             action="#{ordemBean.limparBusca}"
+                                             update="tabelaOrdensForm"
                                              immediate="true"
                                              styleClass="ui-button-secondary"/>
 
                         </div>
 
+                        <!-- TABELA -->
+                        <p:dataTable value="#{ordemBean.listaOrdens}"
+                                     var="o"
+                                     emptyMessage="Nenhuma ordem encontrada"
+                                     stripedRows="true"
+                                     paginator="true"
+                                     rows="10"
+                                     paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}"
+                                     style="width:100%;">
+
+                            <p:column headerText="Nº Ordem" style="width:110px;">
+                                <h:outputText value="#{o.numeroOrdem}"/>
+                            </p:column>
+
+                            <p:column headerText="Cliente" sortBy="#{o.cliente.nome}">
+                                <h:outputText value="#{o.cliente.nome}"/>
+                            </p:column>
+
+                            <p:column headerText="Equipamento" style="width:150px;">
+                                <h:outputText value="#{o.equipamento}"/>
+                            </p:column>
+
+                            <p:column headerText="Marca/Modelo" style="width:150px;">
+                                <h:outputText value="#{o.marca} #{o.modelo}"/>
+                            </p:column>
+
+                            <p:column headerText="Status" style="width:160px; text-align:center;">
+                                <span class="badge-status badge-#{o.status}">
+                                    #{ordemBean.getLabelStatus(o.status)}
+                                </span>
+                            </p:column>
+
+                            <p:column headerText="Abertura" style="width:130px;">
+                                <h:outputText value="#{o.dataAbertura}">
+                                    <f:convertDateTime pattern="dd/MM/yyyy HH:mm"/>
+                                </h:outputText>
+                            </p:column>
+
+                            <p:column headerText="Aberta por" style="width:130px;">
+                                <h:outputText value="#{o.funcionario != null ? o.funcionario.nome : 'Admin'}"/>
+                            </p:column>
+
+                            <p:column headerText="Ações" style="width:100px; text-align:center;">
+                                <p:commandButton icon="pi pi-pencil"
+                                                 title="Editar"
+                                                 action="#{ordemBean.editar(o)}"
+                                                 update="formOrdem tabelaOrdensForm"
+                                                 styleClass="ui-button-warning ui-button-rounded ui-button-icon-only"
+                                                 style="margin-right:4px;"/>
+                                <p:commandButton icon="pi pi-trash"
+                                                 title="Excluir"
+                                                 action="#{ordemBean.excluir(o)}"
+                                                 update="tabelaOrdensForm"
+                                                 styleClass="ui-button-danger ui-button-rounded ui-button-icon-only"
+                                                 onclick="return confirm('Confirma a exclusão da ordem?')"/>
+                            </p:column>
+
+                        </p:dataTable>
+
                     </p:panel>
+                </h:form>
 
-                </p:outputPanel>
+            </p:outputPanel>
 
-            </h:form>
-
-            <!-- TABELA DE CLIENTES -->
-            <h:form id="tabelaClientesForm">
-
-                <p:panel header="Clientes Cadastrados" styleClass="painel-dashboard">
-
-                    <!-- BARRA DE AÇÕES: Novo + Busca -->
-                    <div class="barra-acoes" style="margin-bottom:1rem;">
-
-                        <!-- Botão Novo Cliente — sempre visível aqui -->
-                        <p:commandButton value="Novo Cliente"
-                                         icon="pi pi-plus"
-                                         action="#{clienteBean.novo}"
-                                         update="formCliente tabelaClientesForm"
-                                         styleClass="ui-button-success"
-                                         style="margin-right:16px;"/>
-
-                        <p:inputText value="#{clienteBean.termoBusca}"
-                                     placeholder="Buscar por nome..."
-                                     style="width:250px; margin-right:8px;"/>
-
-                        <p:commandButton value="Buscar"
-                                         icon="pi pi-search"
-                                         action="#{clienteBean.buscar}"
-                                         update="tabelaClientesForm"
-                                         styleClass="ui-button-info"
-                                         style="margin-right:8px;"/>
-
-                        <p:commandButton value="Limpar"
-                                         icon="pi pi-times"
-                                         action="#{clienteBean.limparBusca}"
-                                         update="tabelaClientesForm"
-                                         immediate="true"
-                                         styleClass="ui-button-secondary"/>
-
-                    </div>
-
-                    <!-- TABELA -->
-                    <p:dataTable value="#{clienteBean.listaClientes}"
-                                 var="c"
-                                 emptyMessage="Nenhum cliente encontrado"
-                                 stripedRows="true"
-                                 paginator="true"
-                                 rows="10"
-                                 paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}"
-                                 style="width:100%;">
-
-                        <p:column headerText="Nome" sortBy="#{c.nome}">
-                            <h:outputText value="#{c.nome}"/>
-                        </p:column>
-
-                        <p:column headerText="CPF" style="width:140px;">
-                            <h:outputText value="#{c.cpf}"/>
-                        </p:column>
-
-                        <p:column headerText="Telefone" style="width:160px;">
-                            <h:outputText value="#{c.telefone}"/>
-                        </p:column>
-
-                        <p:column headerText="Endereço">
-                            <h:outputText value="#{c.endereco}"/>
-                        </p:column>
-
-                        <p:column headerText="Ações" style="width:100px; text-align:center;">
-
-                            <p:commandButton icon="pi pi-pencil"
-                                             title="Editar"
-                                             action="#{clienteBean.editar(c)}"
-                                             update="formCliente tabelaClientesForm"
-                                             styleClass="ui-button-warning ui-button-rounded ui-button-icon-only"
-                                             style="margin-right:4px;"/>
-
-                            <p:commandButton icon="pi pi-trash"
-                                             title="Excluir"
-                                             action="#{clienteBean.excluir(c)}"
-                                             update="tabelaClientesForm"
-                                             styleClass="ui-button-danger ui-button-rounded ui-button-icon-only"
-                                             onclick="return confirm('Confirma a exclusão do cliente?')"/>
-
-                        </p:column>
-
-                    </p:dataTable>
-
+            <!-- ================= VENDAS ================= -->
+            <p:outputPanel rendered="#{clienteBean.pagina eq 'vendas'}">
+                <h2 class="titulo-pagina">Vendas</h2>
+                <p:panel header="Controle de Vendas" styleClass="painel-dashboard">
+                    Conteúdo de vendas aqui.
                 </p:panel>
+            </p:outputPanel>
 
-            </h:form>
+            <!-- ================= RELATÓRIOS (apenas ADMIN) ================= -->
+            <p:outputPanel rendered="#{clienteBean.pagina eq 'relatorios' and sessionScope.perfil eq 'ADMIN'}">
+                <h2 class="titulo-pagina">Relatórios</h2>
+                <p:panel header="Relatórios do Sistema" styleClass="painel-dashboard">
+                    Conteúdo de relatórios aqui.
+                </p:panel>
+            </p:outputPanel>
 
-        </p:outputPanel>
+        </div>
 
-        <!-- ================= FUNCIONÁRIOS ================= -->
-        <p:outputPanel rendered="#{clienteBean.pagina eq 'funcionarios'}">
-            <h2 class="titulo-pagina">Funcionários</h2>
-            <p:panel header="Cadastro de Funcionários" styleClass="painel-dashboard">
-                Conteúdo de funcionários aqui.
-            </p:panel>
-        </p:outputPanel>
+        <!-- ================= FOOTER ================= -->
+        <div class="rodape">
+            Sistema Tecnica Olinda © 2026
+        </div>
 
-        <!-- ================= ORDENS ================= -->
-        <p:outputPanel rendered="#{clienteBean.pagina eq 'ordens'}">
-            <h2 class="titulo-pagina">Ordens</h2>
-            <p:panel header="Ordens de Serviço" styleClass="painel-dashboard">
-                Conteúdo de ordens aqui.
-            </p:panel>
-        </p:outputPanel>
-
-        <!-- ================= VENDAS ================= -->
-        <p:outputPanel rendered="#{clienteBean.pagina eq 'vendas'}">
-            <h2 class="titulo-pagina">Vendas</h2>
-            <p:panel header="Controle de Vendas" styleClass="painel-dashboard">
-                Conteúdo de vendas aqui.
-            </p:panel>
-        </p:outputPanel>
-
-        <!-- ================= RELATÓRIOS ================= -->
-        <p:outputPanel rendered="#{clienteBean.pagina eq 'relatorios'}">
-            <h2 class="titulo-pagina">Relatórios</h2>
-            <p:panel header="Relatórios do Sistema" styleClass="painel-dashboard">
-                Conteúdo de relatórios aqui.
-            </p:panel>
-        </p:outputPanel>
-
-    </div>
-
-    <!-- ================= FOOTER ================= -->
-    <div class="rodape">
-        Sistema Tecnica Olinda © 2026
-    </div>
-
-</h:body>
+    </h:body>
 </html>

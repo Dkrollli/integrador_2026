@@ -1,8 +1,12 @@
 controle\clienteBean.class
 facade\usuarioFacade.class
+entidade\ordemServico.class
+controle\usuarioBean.class
 facade\clienteFacade.class
+facade\ordemServicoFacade.class
 controle\loginBean.class
 entidade\usuario.class
 facade\AbstractFacade.class
-controle\usuarioBean.class
+controle\ordemServicoBean.class
+controle\clienteConverter.class
 entidade\cliente.class

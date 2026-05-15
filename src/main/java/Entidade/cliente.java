@@ -49,4 +49,19 @@ public class cliente implements Serializable {
 
     public String getCpf() { return cpf; }
     public void setCpf(String cpf) { this.cpf = cpf; }
+
+    // Necessário para o JSF comparar objetos no selectOneMenu
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null) return false;
+        if (!(obj instanceof cliente)) return false;
+        cliente other = (cliente) obj;
+        return this.id == other.id;
+    }
+
+    @Override
+    public int hashCode() {
+        return Integer.hashCode(this.id);
+    }
 }

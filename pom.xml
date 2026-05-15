@@ -6,7 +6,7 @@
 
     <modelVersion>4.0.0</modelVersion>
 
-     <groupId>com.mycompany</groupId>
+    <groupId>com.mycompany</groupId>
     <artifactId>EstoqueOlinda</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>war</packaging>
@@ -19,6 +19,11 @@
     </properties>
     
     <dependencies>
+        <dependency>
+            <groupId>org.mindrot</groupId>
+            <artifactId>jbcrypt</artifactId>
+            <version>0.4</version>
+        </dependency>
         <dependency>
             <groupId>javax</groupId>
             <artifactId>javaee-web-api</artifactId>
